@@ -2,13 +2,20 @@ import express from "express";
 import { createTour, getTours } from "../controllers/tourController.js";
 import { updateTour } from "../controllers/tourController.js";
 import { deleteTour } from "../controllers/tourController.js";
+import { protect } from "../middleware/authMiddleware.js";
+import { isAdmin } from "../middleware/roleMiddleware.js";
 const router = express.Router();
 
 
+// Only admin can create/update/delete
+router.post("/", protect, isAdmin, createTour);
+router.put("/:id", protect, isAdmin, updateTour);
+router.delete("/:id", protect, isAdmin, deleteTour);
+
+// Everyone can view
 router.get("/", getTours);
-router.post("/", createTour);
-router.put("/:id", updateTour);
-router.delete("/:id", deleteTour);
+
+
 export default router;
 
 
