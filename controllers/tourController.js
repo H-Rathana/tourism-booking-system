@@ -1,3 +1,4 @@
+import pool from "../config/database.js";
 import * as tourService from "../services/tourService.js";
 
 export const getTours = async (req, res) => {
@@ -11,10 +12,32 @@ export const getTours = async (req, res) => {
 
 export const createTour = async (req, res) => {
   try {
-    const newTour = await tourService.createTour(req.body);
-    res.json(newTour);
+    console.log("BODY:", req.body);
+    console.log("FILE:", req.file);
+
+    const { title, location, price } = req.body;
+
+    if (!title || !location || !price) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({ message: "Image is required" });
+    }
+
+    const image = req.file.filename;
+
+    const result = await pool.query(
+      `INSERT INTO tours (title, location, price, image)
+       VALUES ($1, $2, $3, $4)
+       RETURNING *`,
+      [title, location, price, image]
+    );
+
+    res.status(201).json(result.rows[0]);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error("CREATE TOUR ERROR:", error); // 🔥 IMPORTANT
+    res.status(500).json({ message: "Error creating tour" });
   }
 };
 export const updateTour = async (req, res, next) => {

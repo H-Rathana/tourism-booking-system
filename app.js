@@ -3,10 +3,10 @@ import tourRoutes from "./route/tourRoutes.js";
 import { errorHandler } from "./middleware/erorrMiddleware.js";
 import authRoutes from "./route/authRoutes.js";
 import bookingRoutes from "./route/bookingRoutes.js";
-
+import cors from "cors";
 
 const app = express();
-
+app.use(cors());
 // Middleware
 app.use(express.json());
 

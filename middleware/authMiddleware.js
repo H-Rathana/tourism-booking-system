@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 
-const JWT_SECRET = "mysecretkey"; // later move to .env
+const JWT_SECRET = process.env.JWT_SECRET;
 
 export const protect = (req, res, next) => {
   try {

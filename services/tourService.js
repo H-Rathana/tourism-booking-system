@@ -8,12 +8,12 @@ export const getAllTours = async () => {
 };
 
 //Create Tour
-export const createTour = async (data) => {
-  const { title, description, location, price } = data;
-
+export const createTour = async ({ title, location, price, image }) => {
   const result = await pool.query(
-    "INSERT INTO tours (title, description, location, price) VALUES ($1,$2,$3,$4) RETURNING *",
-    [title, description, location, price]
+    `INSERT INTO tours (title, location, price, image)
+     VALUES ($1, $2, $3, $4)
+     RETURNING *`,
+    [title, location, price, image]
   );
 
   return result.rows[0];
