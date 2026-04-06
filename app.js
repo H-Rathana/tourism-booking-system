@@ -14,6 +14,7 @@ app.use(express.json());
 app.use("/api/tours", tourRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/bookings", bookingRoutes);
+app.use("/uploads", express.static("uploads"));
 // Error handler (ALWAYS LAST)
 app.use(errorHandler);
 

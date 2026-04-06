@@ -1,5 +1,7 @@
 import pool from "../config/database.js";
 import * as tourService from "../services/tourService.js";
+import { deleteTourService } from "../services/tourService.js";
+import { updateTourService } from "../services/tourService.js";
 
 export const getTours = async (req, res) => {
   try {
@@ -40,34 +42,63 @@ export const createTour = async (req, res) => {
     res.status(500).json({ message: "Error creating tour" });
   }
 };
-export const updateTour = async (req, res, next) => {
+// export const updateTour = async (req, res, next) => {
+//   try {
+//     const { id } = req.params;
+
+//     const updatedTour = await tourService.updateTour(id, req.body);
+
+//     if (!updatedTour) {
+//       return res.status(404).json({ message: "Tour not found" });
+//     }
+
+//     res.json(updatedTour);
+//   } catch (error) {
+//     next(error);
+//   }
+// };
+export const updateTour = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const updatedTour = await tourService.updateTour(id, req.body);
+    const image = req.file ? req.file.filename : null;
 
-    if (!updatedTour) {
-      return res.status(404).json({ message: "Tour not found" });
-    }
+    const updated = await updateTourService(id, {
+      ...req.body,
+      image,
+    });
 
-    res.json(updatedTour);
+    res.json(updated);
   } catch (error) {
-    next(error);
+    console.error("UPDATE ERROR:", error);
+    res.status(500).json({ message: "Error updating tour" });
   }
 };
 
-export const deleteTour = async (req, res, next) => {
+// export const deleteTour = async (req, res, next) => {
+//   try {
+//     const { id } = req.params;
+
+//     const deletedTour = await tourService.deleteTour(id);
+
+//     if (!deletedTour) {
+//       return res.status(404).json({ message: "Tour not found" });
+//     }
+
+//     res.json({ message: "Tour deleted successfully" });
+//   } catch (error) {
+//     next(error);
+//   }
+// };
+export const deleteTour = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const deletedTour = await tourService.deleteTour(id);
-
-    if (!deletedTour) {
-      return res.status(404).json({ message: "Tour not found" });
-    }
+    await deleteTourService(id);
 
     res.json({ message: "Tour deleted successfully" });
   } catch (error) {
-    next(error);
+    console.error("DELETE ERROR:", error);
+    res.status(500).json({ message: "Error deleting tour" });
   }
 };

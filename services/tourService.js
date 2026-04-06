@@ -20,26 +20,31 @@ export const createTour = async ({ title, location, price, image }) => {
 };
 
 //Update Tour
-export const updateTour = async (id, data) => {
-  const { title, description, location, price } = data;
+export const updateTourService = async (id, data) => {
+  const { title, location, price, image } = data;
 
   const result = await pool.query(
-    `UPDATE tours 
-     SET title=$1, description=$2, location=$3, price=$4 
-     WHERE id=$5 
+    `UPDATE tours
+     SET title = $1,
+         location = $2,
+         price = $3,
+         image = COALESCE($4, image)
+     WHERE id = $5
      RETURNING *`,
-    [title, description, location, price, id]
+    [title, location, price, image, id]
   );
 
   return result.rows[0];
 };
 
 //Delete Tour
-export const deleteTour = async (id) => {
-  const result = await pool.query(
-    "DELETE FROM tours WHERE id=$1 RETURNING *",
-    [id]
-  );
-
-  return result.rows[0]; // ✅ only return data
+// export const deleteTourService = async (id) => {
+//   // const result = await pool.query(
+//   //   "DELETE FROM tours WHERE id=$1 RETURNING *",
+//   //   [id]
+//     await pool.query(`DELETE FROM tours WHERE id = $1`, [id]);
+//   return result.rows[0]; // ✅ only return data
+// };
+export const deleteTourService = async (id) => {
+  await pool.query(`DELETE FROM tours WHERE id = $1`, [id]);
 };

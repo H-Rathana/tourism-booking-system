@@ -11,7 +11,8 @@ const router = express.Router();
 // Only admin can create/update/delete
 //router.post("/", protect, isAdmin, createTour);
 router.post("/", protect, isAdmin, upload.single("image"), createTour);
-router.put("/:id", protect, isAdmin, updateTour);
+// router.put("/:id", protect, isAdmin, updateTour);
+router.put("/:id",protect,isAdmin,upload.single("image"),updateTour);
 router.delete("/:id", protect, isAdmin, deleteTour);
 
 // Everyone can view
