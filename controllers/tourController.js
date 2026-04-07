@@ -17,9 +17,9 @@ export const createTour = async (req, res) => {
     console.log("BODY:", req.body);
     console.log("FILE:", req.file);
 
-    const { title, location, price } = req.body;
+    const { title,description, location, price,duration,max_people } = req.body;
 
-    if (!title || !location || !price) {
+    if (!title || !location || !price || !duration || !max_people) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
@@ -30,10 +30,10 @@ export const createTour = async (req, res) => {
     const image = req.file.filename;
 
     const result = await pool.query(
-      `INSERT INTO tours (title, location, price, image)
-       VALUES ($1, $2, $3, $4)
+      `INSERT INTO tours (title,description, location, price,duration,max_people, image)
+       VALUES ($1, $2, $3, $4,$5,$6,$7)
        RETURNING *`,
-      [title, location, price, image]
+      [title,description, location, price,duration,max_people, image]
     );
 
     res.status(201).json(result.rows[0]);
@@ -67,7 +67,7 @@ export const updateTour = async (req, res) => {
       ...req.body,
       image,
     });
-
+    
     res.json(updated);
   } catch (error) {
     console.error("UPDATE ERROR:", error);

@@ -8,12 +8,12 @@ export const getAllTours = async () => {
 };
 
 //Create Tour
-export const createTour = async ({ title, location, price, image }) => {
+export const createTour = async ({ title,description, location, price,max_people, image }) => {
   const result = await pool.query(
-    `INSERT INTO tours (title, location, price, image)
-     VALUES ($1, $2, $3, $4)
+    `INSERT INTO tours (title,description, location, price,duration,max_people, image)
+     VALUES ($1, $2, $3, $4,$5,$6,$7)
      RETURNING *`,
-    [title, location, price, image]
+    [title,description, location, price,duration,max_people, image]
   );
 
   return result.rows[0];
@@ -21,17 +21,20 @@ export const createTour = async ({ title, location, price, image }) => {
 
 //Update Tour
 export const updateTourService = async (id, data) => {
-  const { title, location, price, image } = data;
+  const { title,description, location, price,duration,max_people, image } = data;
 
   const result = await pool.query(
     `UPDATE tours
      SET title = $1,
-         location = $2,
-         price = $3,
-         image = COALESCE($4, image)
-     WHERE id = $5
+         description=$2,
+         location = $3,
+         price = $4,
+         duration=$5,
+         max_people=$6,
+         image = COALESCE($7, image)
+     WHERE id = $8
      RETURNING *`,
-    [title, location, price, image, id]
+    [title,description, location, price,duration,max_people, image, id]
   );
 
   return result.rows[0];
