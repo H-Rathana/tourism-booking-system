@@ -18,9 +18,9 @@ export const getAllBookings = async () => {
   const result = await pool.query(`
     SELECT b.*, u.name AS user_name, t.title AS tour_title
     FROM bookings b
-    JOIN users u ON b.user_id = u.id
-    JOIN tours t ON b.tour_id = t.id
-    ORDER BY b.id DESC
+    JOIN users u ON b.user_id = u.user_id
+    JOIN tours t ON b.tour_id = t.tour_id
+    ORDER BY b.booking_id DESC
   `);
 
   return result.rows;
@@ -30,7 +30,7 @@ export const updateBookingStatus = async (id, status) => {
   const result = await pool.query(
     `UPDATE bookings 
      SET status=$1 
-     WHERE id=$2 
+     WHERE booking_id=$2 
      RETURNING *`,
     [status, id]
   );

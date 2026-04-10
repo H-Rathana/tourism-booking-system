@@ -32,7 +32,7 @@ export const updateTourService = async (id, data) => {
          duration=$5,
          max_people=$6,
          image = COALESCE($7, image)
-     WHERE id = $8
+     WHERE tour_id = $8
      RETURNING *`,
     [title,description, location, price,duration,max_people, image, id]
   );
@@ -49,5 +49,5 @@ export const updateTourService = async (id, data) => {
 //   return result.rows[0]; // ✅ only return data
 // };
 export const deleteTourService = async (id) => {
-  await pool.query(`DELETE FROM tours WHERE id = $1`, [id]);
+  await pool.query(`DELETE FROM tours WHERE tour_id = $1`, [id]);
 };

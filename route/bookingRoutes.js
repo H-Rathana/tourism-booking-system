@@ -16,6 +16,7 @@ router.post("/", protect, createBooking);
 
 // Admin only
 router.get("/", protect, isAdmin, getBookings);
+
 router.put("/:id/approve", protect, isAdmin, approveBooking);
 router.put("/:id/reject", protect, isAdmin, rejectBooking);
 
