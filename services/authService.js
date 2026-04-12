@@ -7,11 +7,14 @@ const JWT_SECRET = process.env.JWT_SECRET;
 export const registerUser = async (data) => {
   const { name, email, password, phone } = data;
 
-  // hash password
+  if (!password) {
+    throw new Error("Password is required");
+  }
+
   const hashedPassword = await bcrypt.hash(password, 10);
 
   const result = await pool.query(
-    "INSERT INTO users (name, email, password, phone) VALUES ($1,$2,$3,$4) RETURNING id, name, email, phone",
+    "INSERT INTO users (name, email, password, phone) VALUES ($1,$2,$3,$4) RETURNING user_id, name, email, phone",
     [name, email, hashedPassword, phone]
   );
 
@@ -40,7 +43,7 @@ export const loginUser = async (data) => {
 
   // create token
   const token = jwt.sign(
-    { id: user.id, role: user.role },
+    { id: user.user_id, role: user.role },
     JWT_SECRET,
     { expiresIn: "7d" }
   );
@@ -48,7 +51,7 @@ export const loginUser = async (data) => {
   return {
     token,
     user: {
-      id: user.id,
+      id: user.user_id,
       name: user.name,
       email: user.email
     }
