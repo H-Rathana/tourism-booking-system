@@ -3,6 +3,7 @@ import tourRoutes from "./route/tourRoutes.js";
 import { errorHandler } from "./middleware/erorrMiddleware.js";
 import authRoutes from "./route/authRoutes.js";
 import bookingRoutes from "./route/bookingRoutes.js";
+import dashboardRoutes from "./route/dashboardRoutes.js";
 import cors from "cors";
 
 const app = express();
@@ -15,6 +16,7 @@ app.use("/api/tours", tourRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/bookings", bookingRoutes);
 app.use("/uploads", express.static("uploads"));
+app.use("/api/dashboard", dashboardRoutes);
 // Error handler (ALWAYS LAST)
 app.use(errorHandler);
 
