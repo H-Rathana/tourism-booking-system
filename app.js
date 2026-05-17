@@ -13,6 +13,7 @@ app.use(express.json());
 
 // Routes
 app.use("/api/tours", tourRoutes);
+app.use("/api/tours/:id", tourRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/bookings", bookingRoutes);
 app.use("/uploads", express.static("uploads"));

@@ -1,5 +1,5 @@
 import express from "express";
-import { createTour, getTours } from "../controllers/tourController.js";
+import { createTour, getTours ,getTourById} from "../controllers/tourController.js";
 import { updateTour } from "../controllers/tourController.js";
 import { deleteTour } from "../controllers/tourController.js";
 import { protect } from "../middleware/authMiddleware.js";
@@ -17,7 +17,7 @@ router.delete("/:id", protect, isAdmin, deleteTour);
 
 // Everyone can view
 router.get("/", getTours);
-
+router.get("/:id", getTourById);
 
 export default router;
 
