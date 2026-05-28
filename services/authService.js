@@ -53,7 +53,8 @@ export const loginUser = async (data) => {
     user: {
       id: user.user_id,
       name: user.name,
-      email: user.email
+      email: user.email,
+      role:user.role
     }
   };
 };

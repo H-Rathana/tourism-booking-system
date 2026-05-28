@@ -4,7 +4,10 @@ import { errorHandler } from "./middleware/erorrMiddleware.js";
 import authRoutes from "./route/authRoutes.js";
 import bookingRoutes from "./route/bookingRoutes.js";
 import dashboardRoutes from "./route/dashboardRoutes.js";
+import paymentRoutes from "./route/paymentRoutes.js";
+import userRoutes from "./route/userRoutes.js";
 import cors from "cors";
+
 
 const app = express();
 app.use(cors());
@@ -18,6 +21,8 @@ app.use("/api/auth", authRoutes);
 app.use("/api/bookings", bookingRoutes);
 app.use("/uploads", express.static("uploads"));
 app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/payments",paymentRoutes);
+app.use("/api/users",userRoutes);
 // Error handler (ALWAYS LAST)
 app.use(errorHandler);
 

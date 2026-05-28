@@ -1,27 +1,74 @@
 import jwt from "jsonwebtoken";
 
-const JWT_SECRET = process.env.JWT_SECRET;
+const JWT_SECRET =
+  process.env.JWT_SECRET;
 
-export const protect = (req, res, next) => {
+export const protect = (
+  req,
+  res,
+  next
+) => {
+
   try {
+
     let token;
 
-    // check header
-    if (req.headers.authorization && req.headers.authorization.startsWith("Bearer")) {
-      token = req.headers.authorization.split(" ")[1];
+    // ✅ GET TOKEN
+    if (
+      req.headers.authorization &&
+      req.headers.authorization.startsWith(
+        "Bearer"
+      )
+    ) {
+
+      token =
+        req.headers.authorization.split(
+          " "
+        )[1];
+
     }
 
+    // ❌ NO TOKEN
     if (!token) {
-      return res.status(401).json({ message: "Not authorized, no token" });
+
+      return res.status(401).json({
+        message:
+          "Not authorized, no token",
+      });
+
     }
 
-    // verify token
-    const decoded = jwt.verify(token, JWT_SECRET);
+    // ✅ VERIFY TOKEN
+    const decoded =
+      jwt.verify(
+        token,
+        JWT_SECRET
+      );
 
-    req.user = decoded; // attach user info
-    
+    req.user = decoded;
+
     next();
+
   } catch (error) {
-    next(error);
+
+    // 🔥 JWT EXPIRED
+    if (
+      error.name ===
+      "TokenExpiredError"
+    ) {
+
+      return res.status(401).json({
+        message:
+          "Session expired. Please login again.",
+      });
+
+    }
+
+    return res.status(401).json({
+      message:
+        "Invalid token",
+    });
+
   }
+
 };
