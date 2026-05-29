@@ -32,6 +32,8 @@ export const getBookings =
 
     try {
 
+      await bookingService.updateCompletedBookings();
+
       const bookings =
         await bookingService.getAllBookings();
 

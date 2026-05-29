@@ -277,3 +277,13 @@ export const updateBookingStatus =
     }
 
 };
+export const updateCompletedBookings = async () => {
+
+  await pool.query(`
+    UPDATE bookings
+    SET status = 'completed'
+    WHERE status = 'approved'
+    AND travel_date < CURRENT_DATE
+  `);
+
+};

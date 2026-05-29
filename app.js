@@ -6,6 +6,7 @@ import bookingRoutes from "./route/bookingRoutes.js";
 import dashboardRoutes from "./route/dashboardRoutes.js";
 import paymentRoutes from "./route/paymentRoutes.js";
 import userRoutes from "./route/userRoutes.js";
+import reportRoutes from "./route/reportRoutes.js";
 import cors from "cors";
 
 
@@ -23,6 +24,7 @@ app.use("/uploads", express.static("uploads"));
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/payments",paymentRoutes);
 app.use("/api/users",userRoutes);
+app.use("/api/reports",reportRoutes);
 // Error handler (ALWAYS LAST)
 app.use(errorHandler);
 
