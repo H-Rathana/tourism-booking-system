@@ -75,6 +75,12 @@ export const getStats = async () => {
             MONTH FROM booking_date
           )
       `);
+  const checkedInResult =
+  await pool.query(`
+    SELECT COUNT(*) AS checked_in
+    FROM bookings
+    WHERE is_checked_in = true
+  `);
   return {
     totalBookings: totalBookings.rows[0].count,
     totalTour: totalTour.rows[0].count,
@@ -82,6 +88,9 @@ export const getStats = async () => {
     statusStats: statusStats.rows,
     recentBookings:recentBookingsResult.rows,
     monthlyBookings:monthlyBookingsResult.rows,
+    checkedIn:checkedInResult.rows[0].checked_in,
   };
   
 };
+
+  

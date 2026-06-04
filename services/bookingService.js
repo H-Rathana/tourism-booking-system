@@ -1,5 +1,5 @@
 import pool from "../config/database.js";
-
+import * as notificationService from "./notificationService.js";
 // ✅ CREATE BOOKING
 export const createBooking = async (
   userId,
@@ -242,7 +242,6 @@ export const updateBookingStatus =
 
       );
 
-      // ✅ UPDATE PAYMENT
       await client.query(
 
         `
@@ -257,6 +256,67 @@ export const updateBookingStatus =
         ]
 
       );
+      const bookingInfo =
+  await client.query(
+    `
+    SELECT
+      b.booking_id,
+      b.user_id,
+      t.title
+    FROM bookings b
+
+    JOIN tours t
+    ON b.tour_id = t.tour_id
+
+    WHERE b.booking_id = $1
+    `,
+    [bookingId]
+  );
+
+        const booking =
+        bookingInfo.rows[0];
+        let message = "";
+
+    if (
+      bookingStatus === "approved"
+    ) {
+
+      message =
+        `Your booking #${booking.booking_id}
+    (${booking.title})
+    has been approved on. ${new Date().toLocaleString()}.🎉`;
+
+    }
+
+    if (
+      bookingStatus === "rejected"
+    ) {
+
+      message =
+        `Your booking #${booking.booking_id}
+    (${booking.title})
+    has been rejected on.${new Date().toLocaleString()}.❌`;
+
+    }
+
+    if (
+      bookingStatus === "completed"
+    ) {
+
+      message =
+        `🏁 Your trip
+    (${booking.title})
+    has been completed.
+
+    Thank you for travelling
+    with WanderEscape.`;
+
+    }
+        await notificationService.createNotification(
+      booking.user_id,
+      booking.booking_id,
+      message
+    );
 
       await client.query("COMMIT");
 
@@ -285,5 +345,144 @@ export const updateCompletedBookings = async () => {
     WHERE status = 'approved'
     AND travel_date < CURRENT_DATE
   `);
+
+};
+export const getTicketById = async (
+  bookingId
+) => {
+
+  const result =
+    await pool.query(
+      `
+      SELECT
+
+  b.booking_id,
+  b.full_name,
+  b.email,
+  b.phone,
+  b.travel_date,
+  b.people_count,
+  b.total_price,
+  b.status,
+
+  t.title AS tour_title,
+  t.location,
+
+  'Mr. Dara' AS guide_name,
+  '+855 12 345 678' AS guide_phone
+
+FROM bookings b
+JOIN tours t
+ON b.tour_id=t.tour_id
+
+WHERE b.booking_id=$1`,
+      [bookingId]
+    );
+
+  return result.rows[0];
+
+};
+export const checkInBooking = async (
+  bookingId
+) => {
+
+  // Find booking first
+  const existing =
+    await pool.query(
+      `
+      SELECT
+        b.*,
+        t.title AS tour_title
+      FROM bookings b
+      JOIN tours t
+      ON b.tour_id = t.tour_id
+      WHERE b.booking_id = $1
+      `,
+      [bookingId]
+    );
+
+  if (
+    existing.rows.length === 0
+  ) {
+    throw new Error(
+      "Booking not found"
+    );
+  }
+
+  const booking =
+    existing.rows[0];
+
+  // Already checked in
+  if (
+    booking.is_checked_in
+  ) {
+
+    return {
+      alreadyCheckedIn: true,
+      ...booking,
+    };
+
+  }
+
+  // First check-in
+  const result =
+    await pool.query(
+      `
+      UPDATE bookings
+      SET
+        is_checked_in = TRUE,
+        checked_in_at = NOW()
+      WHERE booking_id = $1
+      RETURNING *
+      `,
+      [bookingId]
+    );
+
+  const updated =
+    await pool.query(
+      `
+      SELECT
+        b.*,
+        t.title AS tour_title
+      FROM bookings b
+      JOIN tours t
+      ON b.tour_id = t.tour_id
+      WHERE b.booking_id = $1
+      `,
+      [bookingId]
+    );
+
+  return {
+    alreadyCheckedIn: false,
+    ...updated.rows[0],
+  };
+};
+export const getCheckedInBookings =
+  async () => {
+
+    const result =
+      await pool.query(`
+
+        SELECT
+
+          b.booking_id,
+          b.full_name,
+          b.checked_in_at,
+
+          t.title AS tour_title,
+          t.location
+
+        FROM bookings b
+
+        JOIN tours t
+        ON b.tour_id = t.tour_id
+
+        WHERE b.is_checked_in = TRUE
+
+        ORDER BY b.checked_in_at DESC
+
+      `);
+
+    return result.rows;
 
 };

@@ -98,3 +98,68 @@ export const rejectBooking =
     }
 
 };
+export const getTicket =
+  async (
+    req,
+    res,
+    next
+  ) => {
+
+    try {
+
+      const ticket =
+        await bookingService.getTicketById(
+          req.params.id
+        );
+
+      res.json(ticket);
+
+    } catch(error){
+
+      next(error);
+
+    }
+
+};
+export const checkInBooking = async (
+  req,
+  res,
+  next
+) => {
+
+  try {
+
+    const { id } =
+      req.params;
+
+    const booking =
+      await bookingService.checkInBooking(
+        id
+      );
+
+    res.json(booking);
+
+  } catch (error) {
+
+    next(error);
+
+  }
+
+};
+export const getCheckedInHistory =
+  async (req, res, next) => {
+
+    try {
+
+      const bookings =
+        await bookingService.getCheckedInBookings();
+
+      res.json(bookings);
+
+    } catch (error) {
+
+      next(error);
+
+    }
+
+};

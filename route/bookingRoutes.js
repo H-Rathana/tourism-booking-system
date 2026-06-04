@@ -3,7 +3,10 @@ import {
   createBooking,
   getBookings,
   approveBooking,
-  rejectBooking
+  rejectBooking,
+  getTicket,
+  checkInBooking,
+  getCheckedInHistory
 } from "../controllers/bookingController.js";
 
 import { protect } from "../middleware/authMiddleware.js";
@@ -13,11 +16,16 @@ const router = express.Router();
 
 // User books tour
 router.post("/", protect, createBooking);
+router.get("/ticket/:id",protect,getTicket);
 
 // Admin only
 router.get("/", protect, isAdmin, getBookings);
 
 router.put("/:id/approve", protect, isAdmin, approveBooking);
 router.put("/:id/reject", protect, isAdmin, rejectBooking);
+
+router.put("/:id/checkin",protect,isAdmin,checkInBooking);
+router.get("/checkedin/history",protect, isAdmin,getCheckedInHistory);
+
 
 export default router;
