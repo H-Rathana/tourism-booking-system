@@ -486,3 +486,28 @@ export const getCheckedInBookings =
     return result.rows;
 
 };
+export const getMyBookings =
+  async (userId) => {
+
+    const result =
+      await pool.query(
+        `
+        SELECT
+          b.*,
+          t.title,
+          t.image
+        FROM bookings b
+        JOIN tours t
+          ON b.tour_id =
+             t.tour_id
+        WHERE
+          b.user_id = $1
+        ORDER BY
+          b.created_at DESC
+        `,
+        [userId]
+      );
+
+    return result.rows;
+
+};

@@ -163,3 +163,26 @@ export const getCheckedInHistory =
     }
 
 };
+export const getMyBookings =
+  async (req, res) => {
+
+    try {
+
+      const bookings =
+        await bookingService
+          .getMyBookings(
+            req.user.id
+          );
+
+      res.json(bookings);
+
+    } catch(error){
+
+      res.status(500).json({
+        message:
+          error.message
+      });
+
+    }
+
+};

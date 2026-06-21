@@ -8,6 +8,7 @@ import paymentRoutes from "./route/paymentRoutes.js";
 import userRoutes from "./route/userRoutes.js";
 import reportRoutes from "./route/reportRoutes.js";
 import notificationRoutes from "./route/notificationRoutes.js";
+import wishlistRoutes from "./route/wishlistRoutes.js";
 import cors from "cors";
 
 
@@ -27,6 +28,8 @@ app.use("/api/payments",paymentRoutes);
 app.use("/api/users",userRoutes);
 app.use("/api/reports",reportRoutes);
 app.use("/api/notifications",notificationRoutes);
+app.use("/api/wishlist",wishlistRoutes);
+app.use("/uploads",express.static("uploads"));
 // Error handler (ALWAYS LAST)
 app.use(errorHandler);
 
