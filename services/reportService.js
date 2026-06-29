@@ -38,6 +38,12 @@ export const getReportData = async () => {
       FROM bookings
       WHERE status='rejected'
     `);
+  const completed =
+    await pool.query(`
+      SELECT COUNT(*)
+      FROM bookings
+      WHERE status='completed'
+    `);
   const monthlyBookings = await pool.query(`
     SELECT
     TO_CHAR(created_at,'Mon') AS month,
@@ -64,6 +70,134 @@ export const getReportData = async () => {
         ORDER BY p.payment_date DESC
         LIMIT 5
         `);
+        const topTourWeek =
+        await pool.query(`
+          SELECT
+            t.title,
+            COUNT(*)::int AS bookings
+          FROM bookings b
+          JOIN tours t
+            ON b.tour_id = t.tour_id
+          WHERE
+            b.created_at >=
+            NOW() - INTERVAL '7 days'
+          GROUP BY t.title
+          ORDER BY bookings DESC
+          LIMIT 1
+        `);
+  const topTourMonth =
+  await pool.query(`
+    SELECT
+      t.title,
+      COUNT(*)::int AS bookings
+    FROM bookings b
+    JOIN tours t
+      ON b.tour_id = t.tour_id
+    WHERE
+      DATE_TRUNC(
+        'month',
+        b.created_at
+      )
+      =
+      DATE_TRUNC(
+        'month',
+        CURRENT_DATE
+      )
+    GROUP BY t.title
+    ORDER BY bookings DESC
+    LIMIT 1
+  `);
+  const topTourYear =
+  await pool.query(`
+    SELECT
+      t.title,
+      COUNT(*)::int AS bookings
+    FROM bookings b
+    JOIN tours t
+      ON b.tour_id = t.tour_id
+    WHERE
+      DATE_TRUNC(
+        'year',
+        b.created_at
+      )
+      =
+      DATE_TRUNC(
+        'year',
+        CURRENT_DATE
+      )
+    GROUP BY t.title
+    ORDER BY bookings DESC
+    LIMIT 1
+  `);
+
+  const revenueWeek =
+  await pool.query(`
+    SELECT
+      COALESCE(
+        SUM(amount),
+        0
+      ) AS revenue
+    FROM payments
+    WHERE
+      payment_status='paid'
+    AND
+      payment_date >=
+      NOW() - INTERVAL '7 days'
+  `);
+  const revenueMonth =
+  await pool.query(`
+    SELECT
+      COALESCE(
+        SUM(amount),
+        0
+      ) AS revenue
+    FROM payments
+    WHERE
+      payment_status='paid'
+    AND
+      DATE_TRUNC(
+        'month',
+        payment_date
+      )
+      =
+      DATE_TRUNC(
+        'month',
+        CURRENT_DATE
+      )
+  `);
+  const revenueYear =
+  await pool.query(`
+    SELECT
+      COALESCE(
+        SUM(amount),
+        0
+      ) AS revenue
+    FROM payments
+    WHERE
+      payment_status='paid'
+    AND
+      DATE_TRUNC(
+        'year',
+        payment_date
+      )
+      =
+      DATE_TRUNC(
+        'year',
+        CURRENT_DATE
+      )
+  `);
+  const topTours =
+await pool.query(`
+  SELECT
+    t.title,
+    COUNT(*)::int AS bookings
+  FROM bookings b
+  JOIN tours t
+  ON b.tour_id=t.tour_id
+  GROUP BY t.title
+  ORDER BY bookings DESC
+  LIMIT 5
+`);
   return {
 
     totalRevenue:
@@ -80,9 +214,24 @@ export const getReportData = async () => {
 
     rejected:
       rejected.rows[0].count,
+    completed:
+      completed.rows[0].count,
+
     monthlyBookings:
     monthlyBookings.rows,
     recentTransactions:
-    recentTransactions.rows
+    recentTransactions.rows,
+
+    topTourWeek:topTourWeek.rows[0] || null,
+    topTourMonth:topTourMonth.rows[0] || null,
+    topTourYear:topTourYear.rows[0] || null,
+
+    revenueWeek:revenueWeek.rows[0].revenue,
+
+    revenueMonth:revenueMonth.rows[0].revenue,
+
+    revenueYear:revenueYear.rows[0].revenue,
+
+    topTours:topTours.rows,
   };
 };

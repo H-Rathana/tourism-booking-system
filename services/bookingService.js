@@ -511,3 +511,34 @@ export const getMyBookings =
     return result.rows;
 
 };
+export const getUserBookings =
+  async (userId) => {
+
+    const result =
+      await pool.query(
+        `
+        SELECT
+          b.booking_id,
+          b.travel_date,
+          b.people_count,
+          b.total_price,
+          b.status,
+          b.created_at,
+          u.name,
+          u.profile_image,
+          t.title,
+          t.image,
+          t.location
+        FROM bookings b
+        JOIN tours t
+        ON b.tour_id=t.tour_id
+        JOIN users u
+        ON b.user_id = u.user_id
+        WHERE b.user_id=$1
+        ORDER BY b.created_at DESC
+        `,
+        [userId]
+      );
+
+    return result.rows;
+};

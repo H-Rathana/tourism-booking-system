@@ -1,29 +1,56 @@
 import pool from "../config/database.js";
 
 // ✅ GET ALL USERS
-export const getAllUsers =
-  async () => {
+// export const getAllUsers =
+//   async () => {
 
-    const result =
-      await pool.query(`
+//     const result =
+//       await pool.query(`
 
-        SELECT
-          user_id,
-          name,
-          email,
-          role,
-          created_at
+//         SELECT
+//           user_id,
+//           name,
+//           email,
+//           role,
+//           created_at
 
-        FROM users
+//         FROM users
 
-        ORDER BY
-        user_id DESC
+//         ORDER BY
+//         user_id DESC
 
-      `);
+//       `);
 
-    return result.rows;
+//     return result.rows;
 
+// };
+
+export const getAllUsers = async () => {
+  const result = await pool.query(`
+    SELECT
+      u.user_id,
+      u.name,
+      u.email,
+      u.role,
+      u.created_at,
+      u.profile_image,
+      COUNT(b.booking_id) AS total_bookings
+    FROM users u
+    LEFT JOIN bookings b
+      ON u.user_id = b.user_id
+    GROUP BY
+      u.user_id,
+      u.name,
+      u.email,
+      u.role,
+      u.created_at,
+      u.profile_image
+    ORDER BY u.user_id DESC
+  `);
+
+  return result.rows;
 };
+
 export const getProfile = async (
   userId
 ) => {
@@ -110,4 +137,26 @@ export const updateProfileImage =
 
     return result.rows[0];
 
+};
+
+export const getUserById =
+  async (userId) => {
+
+    const result =
+      await pool.query(
+        `
+        SELECT
+          user_id,
+          name,
+          email,
+          role,
+          profile_image,
+          created_at
+        FROM users
+        WHERE user_id = $1
+        `,
+        [userId]
+      );
+
+    return result.rows[0];
 };

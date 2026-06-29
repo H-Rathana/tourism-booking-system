@@ -186,3 +186,24 @@ export const getMyBookings =
     }
 
 };
+export const getUserBookings =
+  async (
+    req,
+    res,
+    next
+  ) => {
+    try {
+
+      const bookings =
+        await bookingService.getUserBookings(
+          req.params.id
+        );
+
+      res.json(bookings);
+
+    } catch (error) {
+
+      next(error);
+
+    }
+};
