@@ -70,7 +70,7 @@ export const getReportData = async () => {
         ORDER BY p.payment_date DESC
         LIMIT 5
         `);
-        const topTourWeek =
+    const topTourWeek =
         await pool.query(`
           SELECT
             t.title,
@@ -129,6 +129,98 @@ export const getReportData = async () => {
     ORDER BY bookings DESC
     LIMIT 1
   `);
+  
+  const topToursWeek =
+await pool.query(`
+SELECT
+
+t.title,
+
+COUNT(*)::int AS bookings
+
+FROM bookings b
+
+JOIN tours t
+ON b.tour_id=t.tour_id
+
+WHERE
+b.created_at >=
+NOW() - INTERVAL '7 days'
+
+GROUP BY t.title
+
+ORDER BY bookings DESC
+
+LIMIT 5
+`);
+
+const topToursMonth =
+await pool.query(`
+SELECT
+
+t.title,
+
+COUNT(*)::int AS bookings
+
+FROM bookings b
+
+JOIN tours t
+ON b.tour_id=t.tour_id
+
+WHERE
+
+DATE_TRUNC(
+'month',
+b.created_at
+)
+
+=
+
+DATE_TRUNC(
+'month',
+CURRENT_DATE
+)
+
+GROUP BY t.title
+
+ORDER BY bookings DESC
+
+LIMIT 5
+`);
+
+const topToursYear =
+await pool.query(`
+SELECT
+
+t.title,
+
+COUNT(*)::int AS bookings
+
+FROM bookings b
+
+JOIN tours t
+ON b.tour_id=t.tour_id
+
+WHERE
+
+DATE_TRUNC(
+'year',
+b.created_at
+)
+
+=
+
+DATE_TRUNC(
+'year',
+CURRENT_DATE
+)
+
+GROUP BY t.title
+
+ORDER BY bookings DESC
+
+LIMIT 5
+`);
 
   const revenueWeek =
   await pool.query(`
@@ -198,6 +290,106 @@ await pool.query(`
   ORDER BY bookings DESC
   LIMIT 5
 `);
+
+const weekStats =
+await pool.query(`
+SELECT
+
+COUNT(*)::int AS bookings,
+
+COUNT(*) FILTER (
+WHERE status='approved'
+)::int AS approved,
+
+COUNT(*) FILTER (
+WHERE status='completed'
+)::int AS completed,
+
+COUNT(*) FILTER (
+WHERE status='Pending'
+)::int AS pending,
+
+COUNT(*) FILTER (
+WHERE status='rejected'
+)::int AS rejected
+
+FROM bookings
+
+WHERE created_at >=
+NOW() - INTERVAL '7 days'
+`);
+
+
+const monthStats =
+await pool.query(`
+SELECT
+
+COUNT(*)::int AS bookings,
+
+COUNT(*) FILTER (
+WHERE status='approved'
+)::int AS approved,
+
+COUNT(*) FILTER (
+WHERE status='completed'
+)::int AS completed,
+
+COUNT(*) FILTER (
+WHERE status='Pending'
+)::int AS pending,
+
+COUNT(*) FILTER (
+WHERE status='rejected'
+)::int AS rejected
+
+FROM bookings
+
+WHERE DATE_TRUNC(
+'month',
+created_at
+)
+=
+DATE_TRUNC(
+'month',
+CURRENT_DATE
+)
+`);
+
+const yearStats =
+await pool.query(`
+SELECT
+
+COUNT(*)::int AS bookings,
+
+COUNT(*) FILTER (
+WHERE status='approved'
+)::int AS approved,
+
+COUNT(*) FILTER (
+WHERE status='completed'
+)::int AS completed,
+
+COUNT(*) FILTER (
+WHERE status='Pending'
+)::int AS pending,
+
+COUNT(*) FILTER (
+WHERE status='rejected'
+)::int AS rejected
+
+FROM bookings
+
+WHERE DATE_TRUNC(
+'year',
+created_at
+)
+=
+DATE_TRUNC(
+'year',
+CURRENT_DATE
+)
+`);
+
   return {
 
     totalRevenue:
@@ -226,6 +418,15 @@ await pool.query(`
     topTourMonth:topTourMonth.rows[0] || null,
     topTourYear:topTourYear.rows[0] || null,
 
+    topToursWeek:
+    topToursWeek.rows,
+
+    topToursMonth:
+    topToursMonth.rows,
+
+    topToursYear:
+    topToursYear.rows,
+
     revenueWeek:revenueWeek.rows[0].revenue,
 
     revenueMonth:revenueMonth.rows[0].revenue,
@@ -233,5 +434,11 @@ await pool.query(`
     revenueYear:revenueYear.rows[0].revenue,
 
     topTours:topTours.rows,
+
+    week: weekStats.rows[0],
+
+    month: monthStats.rows[0],
+
+    year: yearStats.rows[0],
   };
 };
