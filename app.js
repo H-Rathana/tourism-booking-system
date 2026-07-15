@@ -10,6 +10,7 @@ import reportRoutes from "./route/reportRoutes.js";
 import notificationRoutes from "./route/notificationRoutes.js";
 import wishlistRoutes from "./route/wishlistRoutes.js";
 import reviewRoutes from "./route/reviewRoutes.js";
+import userDSRoutes from "./route/userDSRoutes.js";
 import cors from "cors";
 
 
@@ -32,6 +33,8 @@ app.use("/api/notifications",notificationRoutes);
 app.use("/api/wishlist",wishlistRoutes);
 app.use("/uploads",express.static("uploads"));
 app.use("/api/reviews",reviewRoutes);
+app.use("/api/user-dashboard",userDSRoutes);
+
 
 // Error handler (ALWAYS LAST)
 app.use(errorHandler);

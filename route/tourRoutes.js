@@ -1,7 +1,9 @@
 import express from "express";
-import { createTour, getTours ,getTourById} from "../controllers/tourController.js";
+import { createTour, getTours ,getTourById, getTourStatsController} from "../controllers/tourController.js";
 import { updateTour } from "../controllers/tourController.js";
 import { deleteTour } from "../controllers/tourController.js";
+import { getPopularToursController } from "../controllers/tourController.js";
+
 import { protect } from "../middleware/authMiddleware.js";
 import { isAdmin } from "../middleware/roleMiddleware.js";
 import { upload } from "../utils/uploads.js";
@@ -17,7 +19,10 @@ router.delete("/:id", protect, isAdmin, deleteTour);
 
 // Everyone can view
 router.get("/", getTours);
+router.get("/popular",getPopularToursController);
+router.get("/stats",getTourStatsController);
 router.get("/:id", getTourById);
+
 
 export default router;
 

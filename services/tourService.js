@@ -40,14 +40,52 @@ export const updateTourService = async (id, data) => {
   return result.rows[0];
 };
 
-//Delete Tour
-// export const deleteTourService = async (id) => {
-//   // const result = await pool.query(
-//   //   "DELETE FROM tours WHERE id=$1 RETURNING *",
-//   //   [id]
-//     await pool.query(`DELETE FROM tours WHERE id = $1`, [id]);
-//   return result.rows[0]; // ✅ only return data
-// };
 export const deleteTourService = async (id) => {
   await pool.query(`DELETE FROM tours WHERE tour_id = $1`, [id]);
+};
+
+export const getPopularTours = async () => {
+
+  const result = await pool.query(`
+    SELECT
+      t.*,
+      COUNT(b.booking_id)::int AS bookings
+    FROM tours t
+    LEFT JOIN bookings b
+      ON t.tour_id = b.tour_id
+    GROUP BY t.tour_id
+    ORDER BY bookings DESC
+    LIMIT 3
+  `);
+
+  return result.rows;
+};
+export const getTourStats = async () => {
+
+    const result = await pool.query(`
+        SELECT
+            COUNT(*) AS total_tours,
+            COUNT(DISTINCT location) AS destinations
+        FROM tours
+    `);
+
+    const bookingResult = await pool.query(`
+        SELECT COUNT(*) AS travelers
+        FROM bookings
+        WHERE status='completed'
+    `);
+
+    const reviewResult = await pool.query(`
+        SELECT
+            ROUND(AVG(rating),1) AS average_rating
+        FROM reviews
+    `);
+
+    return {
+        totalTours: Number(result.rows[0].total_tours),
+        destinations: Number(result.rows[0].destinations),
+        travelers: Number(bookingResult.rows[0].travelers),
+        averageRating:
+            Number(reviewResult.rows[0].average_rating || 0)
+    };
 };

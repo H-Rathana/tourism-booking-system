@@ -2,6 +2,8 @@ import pool from "../config/database.js";
 import * as tourService from "../services/tourService.js";
 import { deleteTourService } from "../services/tourService.js";
 import { updateTourService } from "../services/tourService.js";
+import { getPopularTours } from "../services/tourService.js";
+import { getTourStats } from "../services/tourService.js";
 
 export const getTours = async (req, res) => {
   try {
@@ -62,21 +64,7 @@ export const createTour = async (req, res) => {
     res.status(500).json({ message: "Error creating tour" });
   }
 };
-// export const updateTour = async (req, res, next) => {
-//   try {
-//     const { id } = req.params;
 
-//     const updatedTour = await tourService.updateTour(id, req.body);
-
-//     if (!updatedTour) {
-//       return res.status(404).json({ message: "Tour not found" });
-//     }
-
-//     res.json(updatedTour);
-//   } catch (error) {
-//     next(error);
-//   }
-// };
 export const updateTour = async (req, res) => {
   try {
     const { id } = req.params;
@@ -95,21 +83,6 @@ export const updateTour = async (req, res) => {
   }
 };
 
-// export const deleteTour = async (req, res, next) => {
-//   try {
-//     const { id } = req.params;
-
-//     const deletedTour = await tourService.deleteTour(id);
-
-//     if (!deletedTour) {
-//       return res.status(404).json({ message: "Tour not found" });
-//     }
-
-//     res.json({ message: "Tour deleted successfully" });
-//   } catch (error) {
-//     next(error);
-//   }
-// };
 export const deleteTour = async (req, res) => {
   try {
     const { id } = req.params;
@@ -122,3 +95,34 @@ export const deleteTour = async (req, res) => {
     res.status(500).json({ message: "Error deleting tour" });
   }
 };
+
+export const getPopularToursController =
+async (req,res)=>{
+
+    const tours =
+      await getPopularTours();
+
+    res.json(tours);
+
+};
+
+export const getTourStatsController = async (req,res)=>{
+
+    try{
+
+        const stats =
+            await tourService.getTourStats();
+
+        res.json(stats);
+
+    }catch(err){
+
+        console.log(err);
+
+        res.status(500).json({
+            message:"Server Error"
+        });
+
+    }
+
+}
