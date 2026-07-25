@@ -174,3 +174,23 @@ export const deleteOwnReview =
     }
 
 };
+export const getHomeReviewsController = async (req, res) => {
+
+  try {
+
+    const reviews =
+      await reviewService.getHomeReviews();
+
+    res.json(reviews);
+
+  } catch (error) {
+
+    console.error(error);
+
+    res.status(500).json({
+      message: "Server Error",
+    });
+
+  }
+
+};

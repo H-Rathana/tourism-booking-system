@@ -11,6 +11,7 @@ import notificationRoutes from "./route/notificationRoutes.js";
 import wishlistRoutes from "./route/wishlistRoutes.js";
 import reviewRoutes from "./route/reviewRoutes.js";
 import userDSRoutes from "./route/userDSRoutes.js";
+import tourGalleryRoutes from "./route/tourGalleryRoutes.js";
 import cors from "cors";
 
 
@@ -34,7 +35,7 @@ app.use("/api/wishlist",wishlistRoutes);
 app.use("/uploads",express.static("uploads"));
 app.use("/api/reviews",reviewRoutes);
 app.use("/api/user-dashboard",userDSRoutes);
-
+app.use("/api/gallery",tourGalleryRoutes);
 
 // Error handler (ALWAYS LAST)
 app.use(errorHandler);

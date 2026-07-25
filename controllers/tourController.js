@@ -1,10 +1,13 @@
-import pool from "../config/database.js";
+
 import * as tourService from "../services/tourService.js";
+import {updateSingleTourStatus, getTourByIdService,} from "../services/tourService.js";
 import { deleteTourService } from "../services/tourService.js";
 import { updateTourService } from "../services/tourService.js";
 import { getPopularTours } from "../services/tourService.js";
 import { getTourStats } from "../services/tourService.js";
-
+import { getAvailableTours } from "../services/tourService.js";
+import {getPopularDestinations,} from "../services/tourService.js";
+import {getDestinationsService,} from "../services/tourService.js";
 export const getTours = async (req, res) => {
   try {
     const tours = await tourService.getAllTours();
@@ -13,74 +16,159 @@ export const getTours = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+
 export const getTourById = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const result = await pool.query(
-      "SELECT * FROM tours WHERE tour_id = $1",
-      [id]
-    );
+    const tour = await tourService.getTourByIdService(id);
 
-    if (result.rows.length === 0) {
-      return res.status(404).json({ message: "Tour not found" });
+    if (!tour) {
+      return res.status(404).json({
+        message: "Tour not found",
+      });
     }
 
-    res.json(result.rows[0]);
+    res.json(tour);
 
   } catch (error) {
+
     console.error(error);
-    res.status(500).json({ message: "Server error" });
+
+    res.status(500).json({
+      message: "Server Error",
+    });
+
   }
+};
+
+export const getAvailableToursController = async (
+  req,
+  res
+) => {
+
+  try {
+
+    const tours =
+      await tourService.getAvailableTours();
+
+    res.json(tours);
+
+  } catch (err) {
+
+    res.status(500).json({
+      message: err.message
+    });
+
+  }
+
 };
 
 export const createTour = async (req, res) => {
   try {
-    console.log("BODY:", req.body);
-    console.log("FILE:", req.file);
 
-    const { title,description, location, price,duration,max_people } = req.body;
+    const {
+      title,
+      description,
+      itinerary,
+      location,
+      price,
+      duration,
+      max_people,
+      available_from,
+      available_until,
+    } = req.body;
 
-    if (!title || !location || !price || !duration || !max_people) {
-      return res.status(400).json({ message: "All fields are required" });
+    if (
+      !title ||
+      !location ||
+      !price ||
+      !duration ||
+      !max_people ||
+      !available_from ||
+      !available_until
+    ) {
+      return res.status(400).json({
+        message: "All fields are required.",
+      });
     }
 
     if (!req.file) {
-      return res.status(400).json({ message: "Image is required" });
+      return res.status(400).json({
+        message: "Image is required.",
+      });
     }
 
     const image = req.file.filename;
 
-    const result = await pool.query(
-      `INSERT INTO tours (title,description, location, price,duration,max_people, image)
-       VALUES ($1, $2, $3, $4,$5,$6,$7)
-       RETURNING *`,
-      [title,description, location, price,duration,max_people, image]
-    );
+    const tour = await tourService.createTourService({
+  title,
+  description,
+  itinerary,
+  location,
+  price,
+  duration,
+  max_people,
+  available_from,
+  available_until,
+  image,
+});
 
-    res.status(201).json(result.rows[0]);
+// Automatically calculate the correct status
+await tourService.updateSingleTourStatus(tour.tour_id);
+
+// Return the updated tour
+const newTour =
+  await tourService.getTourByIdService(tour.tour_id);
+
+res.status(201).json(newTour);
+
   } catch (error) {
-    console.error("CREATE TOUR ERROR:", error); // 🔥 IMPORTANT
-    res.status(500).json({ message: "Error creating tour" });
+
+    console.error(error);
+
+    res.status(500).json({
+      message: "Error creating tour.",
+    });
+
   }
 };
 
 export const updateTour = async (req, res) => {
+
   try {
+
     const { id } = req.params;
 
-    const image = req.file ? req.file.filename : null;
+    const image =
+      req.file ? req.file.filename : null;
 
-    const updated = await updateTourService(id, {
+    // Update tour information
+    await updateTourService(id, {
       ...req.body,
       image,
     });
-    
-    res.json(updated);
+
+    // Recalculate the status
+    await updateSingleTourStatus(id);
+
+    // Get the latest data
+    const updatedTour =
+      await getTourByIdService(id);
+
+    res.json(updatedTour);
+
   } catch (error) {
+
     console.error("UPDATE ERROR:", error);
-    res.status(500).json({ message: "Error updating tour" });
+
+    res.status(500).json({
+      message: "Error updating tour",
+    });
+
   }
+
 };
 
 export const deleteTour = async (req, res) => {
@@ -126,3 +214,46 @@ export const getTourStatsController = async (req,res)=>{
     }
 
 }
+
+export const getPopularDestinationsController =
+  async (req, res) => {
+
+    try {
+
+      const destinations =
+        await getPopularDestinations();
+
+      res.json(destinations);
+
+    } catch (error) {
+
+      console.log(error);
+
+      res.status(500).json({
+        message: "Server Error",
+      });
+
+    }
+
+};
+
+export const getDestinationsController = async (req, res) => {
+
+  try {
+
+    const destinations =
+      await getDestinationsService();
+
+    res.json(destinations);
+
+  } catch (error) {
+
+    console.log(error);
+
+    res.status(500).json({
+      message: "Server Error",
+    });
+
+  }
+
+};

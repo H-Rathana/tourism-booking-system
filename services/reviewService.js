@@ -227,3 +227,35 @@ export const deleteOwnReview =
     );
 
 };
+
+export const getHomeReviews = async () => {
+
+  const result = await pool.query(`
+    SELECT
+
+      r.review_id,
+      r.rating,
+      r.comment,
+      r.created_at,
+
+      u.name,
+      profile_image,
+
+      t.title
+
+    FROM reviews r
+
+    JOIN users u
+      ON r.user_id = u.user_id
+
+    JOIN tours t
+      ON r.tour_id = t.tour_id
+
+    ORDER BY r.created_at DESC
+
+    LIMIT 3
+  `);
+
+  return result.rows;
+
+};

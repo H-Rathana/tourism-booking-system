@@ -7,6 +7,7 @@ import {
   deleteReview,
   updateReview,
   deleteOwnReview,
+  getHomeReviewsController,
 }
 from "../controllers/reviewController.js";
 
@@ -23,41 +24,17 @@ from "../middleware/roleMiddleware.js";
 const router =
   express.Router();
 
-router.post(
-  "/",
-  protect,
-  createReview
-);
+router.post("/",protect,createReview);
 
-router.get(
-  "/tour/:tourId",
-  getTourReviews
-);
+router.get("/tour/:tourId",getTourReviews);
 
-router.get(
-  "/admin",
-  protect,
-  isAdmin,
-  getAllReviews
-);
+router.get("/admin",protect,isAdmin,getAllReviews);
 
-router.delete(
-  "/:id",
-  protect,
-  isAdmin,
-  deleteReview
-);
+router.delete("/:id",protect,isAdmin,deleteReview);
 
-router.put(
-  "/mine/:id",
-  protect,
-  updateReview
-);
+router.put("/mine/:id",protect,updateReview);
 
-router.delete(
-  "/mine/:id",
-  protect,
-  deleteOwnReview
-);
+router.delete("/mine/:id",protect,deleteOwnReview);
+router.get("/home",getHomeReviewsController);
 
 export default router;

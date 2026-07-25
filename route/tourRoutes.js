@@ -3,7 +3,9 @@ import { createTour, getTours ,getTourById, getTourStatsController} from "../con
 import { updateTour } from "../controllers/tourController.js";
 import { deleteTour } from "../controllers/tourController.js";
 import { getPopularToursController } from "../controllers/tourController.js";
-
+import {getPopularDestinationsController,} from "../controllers/tourController.js";
+import { getAvailableToursController } from "../controllers/tourController.js";
+import {getDestinationsController} from "../controllers/tourController.js";
 import { protect } from "../middleware/authMiddleware.js";
 import { isAdmin } from "../middleware/roleMiddleware.js";
 import { upload } from "../utils/uploads.js";
@@ -19,7 +21,11 @@ router.delete("/:id", protect, isAdmin, deleteTour);
 
 // Everyone can view
 router.get("/", getTours);
+router.get("/available", getAvailableToursController);
+
 router.get("/popular",getPopularToursController);
+router.get( "/popular-destinations",getPopularDestinationsController);
+router.get("/destinations", getDestinationsController);
 router.get("/stats",getTourStatsController);
 router.get("/:id", getTourById);
 

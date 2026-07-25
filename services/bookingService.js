@@ -1,5 +1,6 @@
 import pool from "../config/database.js";
 import * as notificationService from "./notificationService.js";
+import { updateSingleTourStatus } from "./tourService.js";
 // ✅ CREATE BOOKING
 export const createBooking = async (
   userId,
@@ -21,10 +22,102 @@ export const createBooking = async (
       full_name,
       email,
       phone,
-      travel_date,
       special_requests,
 
     } = data;
+    // =======================================
+// GET TOUR INFORMATION
+// =======================================
+
+    const tourResult = await client.query(
+    `
+    SELECT
+        max_people,
+        status,
+        available_from,
+        available_until
+    FROM tours
+    WHERE tour_id = $1
+    `,
+    [tour_id]
+    );
+
+    if (tourResult.rows.length === 0) {
+
+       const error = new Error("Tour not found.");
+error.statusCode = 404;
+throw error;
+
+    }
+
+    const tour = tourResult.rows[0];
+    if (tour.status !== "ACTIVE") {
+
+    const error = new Error(
+    "This tour is currently unavailable."
+);
+
+error.statusCode = 400;
+
+throw error;
+
+    }
+    const today = new Date();
+
+    today.setHours(0,0,0,0);
+
+    const availableUntil =
+    new Date(tour.available_until);
+
+    availableUntil.setHours(0,0,0,0);
+
+    if (availableUntil < today) {
+
+        const error = new Error(
+    "This tour has already ended."
+);
+
+error.statusCode = 400;
+
+throw error;
+
+    }
+    const bookedResult =
+    await client.query(
+    `
+    SELECT
+    COALESCE(
+    SUM(people_count),0
+    ) AS booked_people
+    FROM bookings
+    WHERE
+    tour_id=$1
+    AND status='Approved'
+    `,
+    [tour_id]
+    );
+
+    const bookedPeople =
+    Number(
+    bookedResult.rows[0].booked_people
+    );
+
+    const remainingSeats =
+    tour.max_people - bookedPeople;
+
+    if (
+    Number(people_count) >
+    remainingSeats
+    ){
+
+        const error = new Error(
+    `Only ${remainingSeats} seat(s) remaining.`
+        );
+
+        error.statusCode = 400;
+
+        throw error;
+    }
 
     // ✅ CHECK EXISTING BOOKING
     const existingBooking =
@@ -105,7 +198,7 @@ export const createBooking = async (
           full_name,
           email,
           phone,
-          travel_date,
+          tour.available_from,
           special_requests,
 
         ]
@@ -114,7 +207,37 @@ export const createBooking = async (
 
     const booking =
       bookingResult.rows[0];
+    const seatResult =
+      await client.query(
+      `
+      SELECT
+      COALESCE(
+      SUM(people_count),0
+      ) AS booked
+      FROM bookings
+      WHERE tour_id=$1
+      AND status IN ('Pending','Approved')
+      `,
+      [tour_id]
+      );
 
+      const booked =
+      Number(
+      seatResult.rows[0].booked
+      );
+
+      if(booked >= tour.max_people){
+
+          await client.query(
+          `
+          UPDATE tours
+          SET status='FULL'
+          WHERE tour_id=$1
+          `,
+          [tour_id]
+          );
+
+      }
     // ✅ INSERT PAYMENT
     await client.query(
 
@@ -262,6 +385,7 @@ export const updateBookingStatus =
     SELECT
       b.booking_id,
       b.user_id,
+      b.tour_id,
       t.title
     FROM bookings b
 
@@ -320,6 +444,10 @@ export const updateBookingStatus =
 
       await client.query("COMMIT");
 
+      await updateSingleTourStatus(
+          booking.tour_id
+      );
+      
       return {
         success: true,
       };
@@ -340,10 +468,13 @@ export const updateBookingStatus =
 export const updateCompletedBookings = async () => {
 
   await pool.query(`
-    UPDATE bookings
+    UPDATE bookings b
     SET status = 'completed'
-    WHERE status = 'approved'
-    AND travel_date < CURRENT_DATE
+    FROM tours t
+    WHERE
+    b.tour_id = t.tour_id
+    AND b.status = 'approved'
+    AND t.available_until < CURRENT_DATE;
   `);
 
 };
