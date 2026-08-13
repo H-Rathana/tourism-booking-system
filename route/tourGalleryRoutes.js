@@ -12,8 +12,9 @@ from "../controllers/tourGalleryController.js";
 import {protect}
 from "../middleware/authMiddleware.js";
 
-import {isAdmin}
-from "../middleware/roleMiddleware.js";
+// import {isAdmin}
+// from "../middleware/roleMiddleware.js";
+import { authorize } from "../middleware/roleMiddleware.js";
 
 import { galleryUpload }
 from "../utils/galleryUpload.js";
@@ -26,7 +27,7 @@ router.post(
     "/:tourId",
 
     protect,
-    isAdmin,
+    authorize("admin", "SUPER_ADMIN"),
 
     galleryUpload.single("image"),
 
@@ -48,7 +49,7 @@ router.delete(
 
     protect,
 
-    isAdmin,
+    authorize("admin", "SUPER_ADMIN"),
 
     deleteGallery
 

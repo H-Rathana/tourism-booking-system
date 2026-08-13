@@ -7,17 +7,18 @@ import {getPopularDestinationsController,} from "../controllers/tourController.j
 import { getAvailableToursController } from "../controllers/tourController.js";
 import {getDestinationsController} from "../controllers/tourController.js";
 import { protect } from "../middleware/authMiddleware.js";
-import { isAdmin } from "../middleware/roleMiddleware.js";
+// import { isAdmin } from "../middleware/roleMiddleware.js";
+import { authorize } from "../middleware/roleMiddleware.js";
 import { upload } from "../utils/uploads.js";
 const router = express.Router();
 
 
 // Only admin can create/update/delete
 //router.post("/", protect, isAdmin, createTour);
-router.post("/", protect, isAdmin, upload.single("image"), createTour);
+router.post("/", protect, authorize("admin", "SUPER_ADMIN"), upload.single("image"), createTour);
 // router.put("/:id", protect, isAdmin, updateTour);
-router.put("/:id",protect,isAdmin,upload.single("image"),updateTour);
-router.delete("/:id", protect, isAdmin, deleteTour);
+router.put("/:id",protect,authorize("admin", "SUPER_ADMIN"),upload.single("image"),updateTour);
+router.delete("/:id", protect, authorize("admin", "SUPER_ADMIN"), deleteTour);
 
 // Everyone can view
 router.get("/", getTours);

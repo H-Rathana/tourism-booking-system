@@ -16,10 +16,11 @@ import {
 }
 from "../middleware/authMiddleware.js";
 
-import {
-  isAdmin
-}
-from "../middleware/roleMiddleware.js";
+// import {
+//   isAdmin
+// }
+// from "../middleware/roleMiddleware.js";
+import { authorize } from "../middleware/roleMiddleware.js";
 
 const router =
   express.Router();
@@ -28,9 +29,9 @@ router.post("/",protect,createReview);
 
 router.get("/tour/:tourId",getTourReviews);
 
-router.get("/admin",protect,isAdmin,getAllReviews);
+router.get("/admin",protect,authorize("admin", "SUPER_ADMIN"),getAllReviews);
 
-router.delete("/:id",protect,isAdmin,deleteReview);
+router.delete("/:id",protect,authorize("admin", "SUPER_ADMIN"),deleteReview);
 
 router.put("/mine/:id",protect,updateReview);
 

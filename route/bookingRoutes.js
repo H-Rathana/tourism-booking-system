@@ -12,7 +12,8 @@ import {
 } from "../controllers/bookingController.js";
 
 import { protect } from "../middleware/authMiddleware.js";
-import { isAdmin } from "../middleware/roleMiddleware.js";
+// import { isAdmin } from "../middleware/roleMiddleware.js";
+import { authorize } from "../middleware/roleMiddleware.js";
 
 const router = express.Router();
 
@@ -21,14 +22,14 @@ router.post("/", protect, createBooking);
 router.get("/ticket/:id",protect,getTicket);
 router.get("/my-bookings",protect,getMyBookings);
 
-router.put("/:id/checkin",protect,isAdmin,checkInBooking);
-router.get("/checkedin/history",protect, isAdmin,getCheckedInHistory);
+router.put("/:id/checkin",protect,authorize("admin", "SUPER_ADMIN"),checkInBooking);
+router.get("/checkedin/history",protect, authorize("admin", "SUPER_ADMIN"),getCheckedInHistory);
 // Admin only
-router.get("/", protect, isAdmin, getBookings);
+router.get("/", protect, authorize("admin", "SUPER_ADMIN"), getBookings);
 
-router.put("/:id/approve", protect, isAdmin, approveBooking);
-router.put("/:id/reject", protect, isAdmin, rejectBooking);
+router.put("/:id/approve", protect, authorize("admin", "SUPER_ADMIN"), approveBooking);
+router.put("/:id/reject", protect, authorize("admin", "SUPER_ADMIN"), rejectBooking);
 
-router.get("/user/:id",protect,isAdmin,getUserBookings);
+router.get("/user/:id",protect,authorize("admin", "SUPER_ADMIN"),getUserBookings);
 
 export default router;
