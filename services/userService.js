@@ -536,7 +536,8 @@ export const requestPasswordReset = async (
   // 📧 SEND CODE TO USER EMAIL
     await sendPasswordResetEmail(
       user.email,
-      code
+      code,
+      user.name
     );
 
   return {

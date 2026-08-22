@@ -15,10 +15,13 @@ export const sendPasswordResetEmail = async (
   userName = "Traveler"
 ) => {
   const info = await transporter.sendMail({
-    from: {
-      name: "WanderEscape",
-      address: process.env.SMTP_USER,
-    },
+    from: 
+    // {
+    //   name: "WanderEscape",
+    //   address: process.env.SMTP_USER,
+    // }
+    `"WanderEscape" <${process.env.SMTP_USER}>`
+    ,
 
     to: email,
 
